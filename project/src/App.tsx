@@ -50,51 +50,102 @@ function App() {
   };
 
   const handleNameSearch = async (name: string): Promise<SearchResult[]> => {
-  setLoading(true);
-  try {
-    const fuzzyResults = fuzzySearch(name, cooperatives);
-    const gptAnalysis = await analyzeCooperativeName(name, cooperatives);
-    const results: SearchResult[] = [];
-
-    if (fuzzyResults.bestMatch) {
-      results.push(generateSearchResult(
-        fuzzyResults.bestMatch,
-        fuzzyResults.matches[0].score * 100,
-        'fuzzy'
-      ));
-    }
-
-    if (gptAnalysis.bestMatch && gptAnalysis.bestMatch.id !== fuzzyResults.bestMatch?.id) {
-      results.push(generateSearchResult(
-        gptAnalysis.bestMatch,
-        gptAnalysis.confidence,
-        'gpt'
-      ));
-    }
-
-    const MIN_SCORE = 0.7;
-    fuzzyResults.matches.slice(1, 10).forEach(match => {
-      if (match.score >= MIN_SCORE && !results.find(r => r.cooperative.id === match.item.id)) {
+    setLoading(true);
+    try {
+      const fuzzyResults = fuzzySearch(name, cooperatives);
+      const gptAnalysis = await analyzeCooperativeName(name, cooperatives);
+      const results: SearchResult[] = [];
+  
+      const MIN_SCORE = 0.7; // seuil minimum (70%)
+  
+      // Ajout du meilleur match fuzzy uniquement si son score est suffisant
+      if (fuzzyResults.bestMatch && fuzzyResults.matches[0].score >= MIN_SCORE) {
         results.push(generateSearchResult(
-          match.item,
-          match.score * 100,
+          fuzzyResults.bestMatch,
+          fuzzyResults.matches[0].score * 100,
           'fuzzy'
         ));
       }
-    });
+  
+      // Ajout du meilleur match GPT uniquement si score de confiance suffisant
+      if (gptAnalysis.bestMatch && gptAnalysis.confidence >= MIN_SCORE * 100 &&
+          gptAnalysis.bestMatch.id !== fuzzyResults.bestMatch?.id) {
+        results.push(generateSearchResult(
+          gptAnalysis.bestMatch,
+          gptAnalysis.confidence,
+          'gpt'
+        ));
+      }
+  
+      // Ajout des autres résultats fuzzy qui dépassent le seuil, sans doublons
+      fuzzyResults.matches.slice(1, 10).forEach(match => {
+        if (match.score >= MIN_SCORE && !results.find(r => r.cooperative.id === match.item.id)) {
+          results.push(generateSearchResult(
+            match.item,
+            match.score * 100,
+            'fuzzy'
+          ));
+        }
+      });
+  
+      setSearchResults(results);
+      addToHistory(name, 'name', results);
+      return results;
+  
+    } catch (error) {
+      console.error('Erreur recherche:', error);
+      setSearchResults([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+//   const handleNameSearch = async (name: string): Promise<SearchResult[]> => {
+//   setLoading(true);
+//   try {
+//     const fuzzyResults = fuzzySearch(name, cooperatives);
+//     const gptAnalysis = await analyzeCooperativeName(name, cooperatives);
+//     const results: SearchResult[] = [];
 
-    setSearchResults(results);
-    addToHistory(name, 'name', results);
-    return results;
+//     if (fuzzyResults.bestMatch) {
+//       results.push(generateSearchResult(
+//         fuzzyResults.bestMatch,
+//         fuzzyResults.matches[0].score * 100,
+//         'fuzzy'
+//       ));
+//     }
 
-  } catch (error) {
-    console.error('Erreur recherche:', error);
-    setSearchResults([]);
-    return [];
-  } finally {
-    setLoading(false);
-  }
-};
+//     if (gptAnalysis.bestMatch && gptAnalysis.bestMatch.id !== fuzzyResults.bestMatch?.id) {
+//       results.push(generateSearchResult(
+//         gptAnalysis.bestMatch,
+//         gptAnalysis.confidence,
+//         'gpt'
+//       ));
+//     }
+
+//     const MIN_SCORE = 0.7;
+//     fuzzyResults.matches.slice(1, 10).forEach(match => {
+//       if (match.score >= MIN_SCORE && !results.find(r => r.cooperative.id === match.item.id)) {
+//         results.push(generateSearchResult(
+//           match.item,
+//           match.score * 100,
+//           'fuzzy'
+//         ));
+//       }
+//     });
+
+//     setSearchResults(results);
+//     addToHistory(name, 'name', results);
+//     return results;
+
+//   } catch (error) {
+//     console.error('Erreur recherche:', error);
+//     setSearchResults([]);
+//     return [];
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
 
 
