@@ -1,4 +1,4 @@
-# CoopVerif - Application de Vérification des Coopératives Agricoles
+# KAIO - Application de Vérification des Coopératives Agricoles
 
 Une application web moderne et complète pour la vérification du statut légal des coopératives agricoles, développée pour un hackathon de haut niveau.
 
