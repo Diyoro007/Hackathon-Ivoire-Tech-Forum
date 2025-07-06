@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SearchResult } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { MapPin, Phone, Mail, Users, Calendar, Building } from 'lucide-react';
@@ -9,6 +9,53 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ results, loading }: SearchResultsProps) {
+  const [speechMessage, setSpeechMessage] = useState<string>('');
+
+  async function fetchGPTMessage() {
+    const texte = "Vieux père, faut faire doucement hein ! Ici là, si tu dors un peu on te marmaille sec !";
+  
+    try {
+      const response = await fetch("http://localhost:8000/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: texte }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+  
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      return audioUrl;
+  
+    } catch (error) {
+      console.error("Erreur de lecture vocale :", error);
+      return null;
+    }
+  }
+  
+
+  useEffect(() => {
+    if (!loading && results.length === 0) {
+      fetchGPTMessage().then(audioUrl => {
+        if (audioUrl) {
+          setSpeechMessage(
+            "Aaah baramôgô, faut faire doucement hein ! Ici là, si tu dors un peu on te marmaille sec !"
+          );
+          const audio = new Audio(audioUrl);
+          console.log("Audio prêt à jouer");
+          audio.play();
+        };
+        // audio.onerror = (e) => {
+        //   console.error("Erreur lecture audio:", e);
+        // };
+      });
+    }
+  }, [loading, results]);
+
   if (loading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
@@ -28,6 +75,9 @@ export function SearchResults({ results, loading }: SearchResultsProps) {
           <Building className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p className="text-lg font-medium">Aucune coopérative trouvée</p>
           <p className="text-sm">Essayez avec des termes différents</p>
+          {speechMessage && (
+            <p className="mt-4 italic text-sm text-gray-400">{speechMessage}</p>
+          )}
         </div>
       </div>
     );
