@@ -257,7 +257,7 @@ function App() {
                 <Shield className="h-8 w-8 text-green-600 dark:text-green-400 mr-3" />
                 <div>
                   <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    KAIO
+                    CHECK-COOP
                   </h1>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Vérification des coopératives agricoles
@@ -361,8 +361,8 @@ function App() {
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>© 2024 CoopVerif - Hackathon Agriculture Numérique</p>
-            <p className="mt-1">Powered by OpenAI GPT-4 • Données open source</p>
+            <p>© 2025 CHECK-COOP - Hackathon Ivoire Tech Forum</p>
+            <p className="mt-1">Données open source</p>
           </div>
         </div>
       </footer>
